@@ -28,8 +28,9 @@ class FindHexagon(BaseAlgorithm):
             raise AlgorithmIncomplete
 
         loc = self.finder.locations_from_shapes([hex], camera)[0]
-        angle = np.arctan(loc[0] / (loc[1] + ROBOT_HALF_LENGTH))
-        return loc, angle
+
+        return loc, angle_to_face
+
 
     def reset(self):
         self.finder = None
