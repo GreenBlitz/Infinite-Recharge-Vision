@@ -53,7 +53,7 @@ class BaseAlgorithm(abc.ABC):
         """
 
     @abc.abstractmethod
-    def reset(self):
+    def reset(self, camera: gbv.Camera):
         """
 
         :return:

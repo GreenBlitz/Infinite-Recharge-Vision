@@ -1,7 +1,5 @@
-import gbvision as gbv
 
-
-class AlgorithmIncomplete(gbv.VisionException):
+class AlgorithmIncomplete(BaseException):
     """
 
     """

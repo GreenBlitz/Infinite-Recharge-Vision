@@ -1,9 +1,7 @@
 import gbvision as gbv
 from gbvision.finders.polygon_finder import PolygonFinder
-import numpy as np
 
 from constants import OUTER_PORT, OUTER_PORT_THRESHOLD
-from constants.distances import ROBOT_HALF_LENGTH
 from exceptions.algorithm_incomplete import AlgorithmIncomplete
 from .base_algorithm import BaseAlgorithm
 
@@ -16,12 +14,12 @@ class FindHexagon(BaseAlgorithm):
         self.finder = PolygonFinder(game_object=OUTER_PORT, threshold_func=OUTER_PORT_THRESHOLD)
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
-        '''
+        """
 
         :param frame: frame recieved from camera
         :param camera: camera used
         :return: location and angle in reference to hexagon
-        '''
+        """
         shapes = self.finder.find_shapes(frame)
         hex = shapes[0]
         if len(hex) != 6:
@@ -29,8 +27,9 @@ class FindHexagon(BaseAlgorithm):
 
         loc = self.finder.locations_from_shapes([hex], camera)[0]
 
-        return loc, angle_to_face
+        # TODO add absolute angle
+        return loc
 
 
-    def reset(self):
-        self.finder = None
+    def reset(self, camera: gbv.Camera):
+        camera.set_exposure(-10)

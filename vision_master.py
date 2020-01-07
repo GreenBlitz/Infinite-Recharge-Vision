@@ -30,7 +30,7 @@ def main():
         algo_type = conn.get('algorithm')
         if algo_type is not None:
             if algo_type != current_algo:
-                possible_algos[algo_type].reset()
+                possible_algos[algo_type].reset(camera)
             algo = possible_algos[algo_type]
             algo(frame, camera)
         current_algo = algo_type
