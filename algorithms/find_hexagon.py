@@ -16,12 +16,12 @@ class FindHexagon(BaseAlgorithm):
         self.finder = PolygonFinder(game_object=OUTER_PORT, threshold_func=OUTER_PORT_THRESHOLD)
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
-        '''
+        """
 
         :param frame: frame recieved from camera
         :param camera: camera used
         :return: location and angle in reference to hexagon
-        '''
+        """
         shapes = self.finder.find_shapes(frame)
         hex = shapes[0]
         if len(hex) != 6:
@@ -31,5 +31,5 @@ class FindHexagon(BaseAlgorithm):
         angle = np.arctan(loc[0] / (loc[1] + ROBOT_HALF_LENGTH))
         return loc, angle
 
-    def reset(self):
-        self.finder = None
+    def reset(self, camera: gbv.Camera):
+        camera.set_exposure(-10)
