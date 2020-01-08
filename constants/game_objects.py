@@ -1,4 +1,3 @@
 import gbvision as gbv
 
-OUTER_PORT_TRIANGLE = gbv.GameObject(0.28953628284954834138022815839534)
-OUTER_PORT = gbv.GameObject(0.503)
+OUTER_PORT = gbv.GameObject(0.2590849281606323)

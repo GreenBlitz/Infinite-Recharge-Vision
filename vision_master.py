@@ -17,7 +17,7 @@ def main():
     logger = Logger(LOGGER_NAME)
     conn = gbrpi.TableConn(ip=TABLE_IP, table_name=TABLE_NAME)
     logger.debug('initialized conn')
-    camera = gbv.USBCamera(0, gbv.LIFECAM_3000.rotate_pitch(np.deg2rad(35)))
+    camera = gbv.USBCamera(1, gbv.LIFECAM_3000)
     logger.debug('initialized camera')
 
     all_algos = BaseAlgorithm.get_algorithms()
@@ -25,6 +25,8 @@ def main():
     possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, conn) for key in all_algos}
     current_algo = None
 
+    conn.set('algorithm', 'hexagon')
+    print('starting')
     while True:
         ok, frame = camera.read()
         algo_type = conn.get('algorithm')
