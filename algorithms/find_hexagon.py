@@ -11,7 +11,7 @@ class FindHexagon(BaseAlgorithm):
     def __init__(self, output_key, error_key, conn, log_algorithm_incomplete=False):
         BaseAlgorithm.__init__(self, output_key, error_key, conn, log_algorithm_incomplete)
         self.finder = gbv.ContourFinder(game_object=OUTER_PORT, threshold_func=OUTER_PORT_THRESHOLD,
-                                        contour_min_area=CONTOUR_MIN_AREA)
+                                        contour_min_area=200)
         self.debug = False
         self.window = gbv.FeedWindow('window')
 
