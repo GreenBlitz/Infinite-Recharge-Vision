@@ -9,7 +9,7 @@ from exceptions.algorithm_incomplete import AlgorithmIncomplete
 
 def get_closest(shapes, finder, camera):
     closest_id = None
-    distance = lambda x: gbv.distance_from_object(finder.locations_from_shapes([shapes.get(x)], camera)[0])
+    distance = lambda x: gbv.distance_from_object(finder.locations_from_shapes([shapes[x]], camera)[0])
     for i in shapes:
         if closest_id is None or distance(i) < distance(closest_id):
             closest_id = i
@@ -39,10 +39,10 @@ class FindPowerCells(BaseAlgorithm):
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         power_cells = self.continues.find_shapes(frame)
-        if (self.closest_id == -1 and len(power_cells) > 0) or not power_cells.__contains__(self.closest_id):
-            self.closest_id = get_closest(power_cells, self.finder, camera)
-        elif len(power_cells) == 0:
+        if len(power_cells) == 0:
             raise AlgorithmIncomplete
+        if (self.closest_id == -1 and len(power_cells) > 0) or not (self.closest_id in power_cells):
+            self.closest_id = get_closest(power_cells, self.finder, camera)
 
         marked = frame
         if self.debug:
@@ -51,12 +51,10 @@ class FindPowerCells(BaseAlgorithm):
                 power_cells_list = self.continues.get_shapes_as_list()
                 marked = (gbv.PipeLine(
                     (lambda x: gbv.draw_circles(circs=power_cells_list, frame=x, color=(255, 0, 0), thickness=5))) + gbv.PipeLine((
-                    lambda x: gbv.draw_circles(circs=[power_cells.get(self.closest_id)], color=(0, 0, 255), frame=x, thickness=5))))(
+                    lambda x: gbv.draw_circles(circs=[power_cells[self.closest_id]], color=(0, 0, 255), frame=x, thickness=5))))(
                     frame)
             self.window.show_frame(marked)
-        if len(power_cells) == 0:
-            raise AlgorithmIncomplete
-        return self.finder.locations_from_shapes(shapes=[power_cells.get(self.closest_id)], camera=camera)[0]
+        return self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0]
 
     def reset(self, camera: gbv.Camera):
         camera.set_exposure(-5)
