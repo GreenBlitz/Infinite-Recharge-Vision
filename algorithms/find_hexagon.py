@@ -1,5 +1,4 @@
 import gbvision as gbv
-import cv2
 
 from constants import OUTER_PORT, OUTER_PORT_THRESHOLD, CONTOUR_MIN_AREA
 from exceptions.algorithm_incomplete import AlgorithmIncomplete
@@ -12,23 +11,18 @@ class FindHexagon(BaseAlgorithm):
     def __init__(self, output_key, error_key, conn, log_algorithm_incomplete=False):
         BaseAlgorithm.__init__(self, output_key, error_key, conn, log_algorithm_incomplete)
         self.finder = gbv.ContourFinder(game_object=OUTER_PORT, threshold_func=OUTER_PORT_THRESHOLD,
-                                        contour_min_area=200)
-        self.debug = True
+                                        contour_min_area=CONTOUR_MIN_AREA)
+        self.debug = False
         self.window = gbv.FeedWindow('window')
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         """
-
         :param frame: frame recieved from camera
         :param camera: camera used
         :return: location and angle in reference to hexagon
         """
         if self.debug:
-            k = self.window.last_key_pressed
-            if k != 'q':
-                self.window.show_frame(frame)
-            else:
-                cv2.destroyAllWindows()
+            self.window.show_frame(frame)
         shapes = self.finder.find_shapes(frame)
         if len(shapes) == 0:
             raise AlgorithmIncomplete()
