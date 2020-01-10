@@ -1,22 +1,19 @@
 import gbvision as gbv
-from gbvision.utils.tracker import Tracker
 
 from constants import CONTOUR_MIN_AREA, SHAPE_LIFESPAN
-from .base_algorithm import BaseAlgorithm
 from constants.game_objects import POWER_CELL
 from constants.thresholds import POWER_CELL_THRESHOLD
+from .base_algorithm import BaseAlgorithm
 
 
 def get_closest(shapes, finder):
-    tmp = None
-    distance = lambda x: gbv.distance_from_object(finder.locations_from_shapes([x])[0])
+    closest_id = None
+    distance = lambda x: gbv.distance_from_object(finder.locations_from_shapes([shapes[x]])[0])
     for i in shapes:
-        if tmp is None:
-            tmp = i
-        elif distance(i) < distance(tmp):
-            tmp = i
+        if closest_id is None or distance(i) < distance(closest_id):
+            closest_id = i
 
-    return [tmp]
+    return closest_id
 
 
 class FindPowerCells(BaseAlgorithm):
@@ -27,36 +24,29 @@ class FindPowerCells(BaseAlgorithm):
 
         self.finder = gbv.CircleFinder(game_object=POWER_CELL, threshold_func=POWER_CELL_THRESHOLD,
                                        contour_min_area=CONTOUR_MIN_AREA)
-        self.debug = False
+        self.debug = True
         if self.debug:
-            self.window = gbv.FeedWindow('feed', drawing_pipeline=lambda x: (self.finder.find_shapes(x), x) +
-                                                                            (lambda x: gbv.draw_circles(frame=x[1],
-                                                                                                        circs=x[0],
-                                                                                                        color=(
-                                                                                                            255, 0, 0)
-                                                                                                        )))
+            self.window = gbv.FeedWindow('feed', drawing_pipeline=
+            lambda x: (self.finder.find_shapes(x), x) + (
+                lambda x: gbv.draw_circles(frame=x[1], circs=x[0], color=(255, 0, 0))))
 
-        self.continues = None
+        self.continues = gbv.ContinuesShapeWrapper(finding_pipeline=self.finder, frame=None, shapes=[],
+                                                   shape_type='CIRCLE', shape_lifespan=SHAPE_LIFESPAN, track_new=True,
+                                                   tracker_type='MEDIANFLOW')
         self.found_cell = False
+        self.closest_id = -1
 
-        def _process(self, frame: gbv.Frame, camera: gbv.Camera):
-            if self.debug:
-                self.window.show_frame(frame)
+    def _process(self, frame: gbv.Frame, camera: gbv.Camera):
+        power_cells = self.continues.find_shapes(frame)
+        if (self.closest_id == -1 and len(power_cells) > 0) or not power_cells.__contains__(self.closest_id):
+            self.closest_id = get_closest(power_cells, self.finder)
 
-            if not self.found_fuel:
-                power_cells = self.finder.find_shapes(frame)
-                if len(power_cells) > 0:
-                    self.continues = gbv.ContinuesShapeWrapper(finding_pipeline=self.finder, frame=frame,
-                                                               shapes=power_cells, shape_type='CIRCLE',
-                                                               shape_lifespan=SHAPE_LIFESPAN,
-                                                               track_new=True,
-                                                               tracker_type=Tracker.TRACKER_TYPE_MEDIANFLOW)
-            else:
-                power_cells = self.continues.find_shapes(frame)
-
-            closest_location = self.finder.locations_from_shapes(get_closest(power_cells, self.finder), camera)
-
-            return closest_location
+        if self.debug:
+            not_closest = self.continues.get_shapes_as_list()
+            not_closest.remove(power_cells[self.closest_id])
+            marked = gbv.PipeLine(lambda x: gbv.draw_circles(circs=not_closest, frame=x, color=(255, 0, 0)) + (
+                lambda x: gbv.draw_circles(circs=power_cells[self.closest_id], color=(0, 0, 255), frame=x)))(frame)
+            self.window.show_frame(marked)
 
     def reset(self, camera: gbv.Camera):
         pass
