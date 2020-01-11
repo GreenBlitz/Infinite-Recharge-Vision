@@ -17,7 +17,6 @@ class FindHexagon(BaseAlgorithm):
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         """
-
         :param frame: frame recieved from camera
         :param camera: camera used
         :return: location and angle in reference to hexagon

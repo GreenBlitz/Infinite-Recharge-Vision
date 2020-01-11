@@ -25,7 +25,7 @@ def main():
     possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, conn) for key in all_algos}
     current_algo = None
 
-    conn.set('algorithm', 'hexagon')
+    conn.set('algorithm', 'power cells')
     print('starting')
     while True:
         ok, frame = camera.read()
