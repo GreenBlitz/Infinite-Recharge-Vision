@@ -40,8 +40,8 @@ class FindPowerCells(BaseAlgorithm):
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         power_cells = self.continues.find_shapes(frame)
         if len(power_cells) == 0:
-            raise AlgorithmIncomplete
-        if (self.closest_id == -1 and len(power_cells) > 0) or not (self.closest_id in power_cells):
+            raise AlgorithmIncomplete()
+        if self.closest_id == -1 or self.closest_id not in power_cells:
             self.closest_id = get_closest(power_cells, self.finder, camera)
 
         marked = frame
