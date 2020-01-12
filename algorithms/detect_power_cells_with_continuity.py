@@ -26,8 +26,7 @@ class FindPowerCells(BaseAlgorithm):
         self.finder = gbv.CircleFinder(game_object=POWER_CELL, threshold_func=POWER_CELL_THRESHOLD,
                                        contour_min_area=CONTOUR_MIN_AREA)
         self.shaper = self.finder.find_shapes
-        self.debug = True
-        if self.debug:
+        if BaseAlgorithm.DEBUG:
             self.threshold = gbv.FeedWindow('threshold', drawing_pipeline=POWER_CELL_THRESHOLD)
             self.window = gbv.FeedWindow('feed', drawing_pipeline=gbv.EMPTY_PIPELINE)
 
@@ -45,7 +44,7 @@ class FindPowerCells(BaseAlgorithm):
             self.closest_id = get_closest(power_cells, self.finder, camera)
 
         marked = frame
-        if self.debug:
+        if BaseAlgorithm.DEBUG:
             self.threshold.show_frame(frame)
             if len(power_cells) > 0:
                 power_cells_list = self.continues.get_shapes_as_list()
