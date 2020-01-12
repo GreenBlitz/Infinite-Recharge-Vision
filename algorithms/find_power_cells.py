@@ -57,7 +57,7 @@ class FindPowerCells(BaseAlgorithm):
 
         def cost(x):
             location = self.finder.locations_from_shapes([shapes[x]], camera)[0]
-            return (abs(gbv.plane_angle_by_location(location)) / (2 * np.pi) + 1) * gbv.plane_distance_from_object(
+            return (10 * abs(gbv.plane_angle_by_location(location)) / (2 * np.pi) + 1) * gbv.plane_distance_from_object(
                 location)
 
         for i in shapes:
