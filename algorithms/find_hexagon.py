@@ -8,17 +8,17 @@ from .base_algorithm import BaseAlgorithm
 class FindHexagon(BaseAlgorithm):
     algorithm_name = 'hexagon'
 
-    def __init__(self, output_key, error_key, conn, log_algorithm_incomplete=False):
-        BaseAlgorithm.__init__(self, output_key, error_key, conn, log_algorithm_incomplete)
+    def __init__(self, output_key, success_key, conn, log_algorithm_incomplete=False):
+        BaseAlgorithm.__init__(self, output_key, success_key, conn, log_algorithm_incomplete)
         self.finder = gbv.ContourFinder(game_object=OUTER_PORT, threshold_func=OUTER_PORT_THRESHOLD,
                                         contour_min_area=CONTOUR_MIN_AREA)
         self.window = gbv.FeedWindow('window')
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         """
-        :param frame: frame recieved from camera
+        :param frame: frame received from camera
         :param camera: camera used
-        :return: location and angle in reference to hexagon
+        :return: location
         """
         if BaseAlgorithm.DEBUG:
             self.window.show_frame(frame)

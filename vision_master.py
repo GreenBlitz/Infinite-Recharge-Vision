@@ -25,12 +25,13 @@ def main():
     possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, conn) for key in all_algos}
     current_algo = None
 
-    conn.set('algorithm', 'power cells')
-    print('starting')
+    logger.info('starting...')
     while True:
         ok, frame = camera.read()
         algo_type = conn.get('algorithm')
         if algo_type is not None:
+            if algo_type not in possible_algos:
+                logger.warning(f'Unknown algorithm type: {algo_type}')
             if algo_type != current_algo:
                 possible_algos[algo_type].reset(camera)
             algo = possible_algos[algo_type]
