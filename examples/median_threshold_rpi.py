@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 import gbvision as gbv
+from gbrpi.net.table_conn import TableConn
 
 stdv = np.array([40, 40, 40])
 
@@ -10,7 +11,7 @@ def main():
     broadcast = gbv.TCPStreamBroadcaster(5808, '192.168.1.60')
     camera = gbv.USBCamera(0)
     camera.set_exposure(-3)
-    conn = TableConn('calibrate')
+    conn = TableConn('192.168.1.8', 'calibrate')
     conn.set('bbox', None)
     streaming = True
     while True:

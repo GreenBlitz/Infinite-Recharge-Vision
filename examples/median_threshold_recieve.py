@@ -1,13 +1,14 @@
 import cv2
 
 import gbvision as gbv
+from gbrpi.net.table_conn import TableConn
 
 
 def main():
     reciever = gbv.TCPStreamReceiver('192.168.1.8', 5808)
     window = gbv.StreamWindow('feed', reciever)
     window.open()
-    conn = gbv.TableConn('calibrate')
+    conn = TableConn('192.168.1.8', 'calibrate')
     while True:
         frame = reciever.get_frame()
         k = window.last_key_pressed
