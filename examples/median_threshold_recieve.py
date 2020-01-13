@@ -1,39 +1,36 @@
 import cv2
+import numpy as np
 
 import gbvision as gbv
-from gbrpi.net.table_conn import TableConn
+
+stdv = np.array([40, 40, 40])
 
 
 def main():
-    reciever = gbv.TCPStreamReceiver('192.168.1.8', 5808)
-    window = gbv.StreamWindow('feed', reciever)
-    window.open()
-    conn = TableConn('192.168.1.8', 'calibrate')
+    recieve = gbv.TCPStreamReceiver('192.168.1.8', 5808)
+    window = gbv.StreamWindow('feed', recieve)
     while True:
-        frame = reciever.get_frame()
+        frame = window.show_and_get_frame()
         k = window.last_key_pressed
         if k == 'r':
-            conn.set('key', 'r')
             bbox = cv2.selectROI('feed', frame)
+            thr = gbv.median_threshold(frame, stdv, bbox, 'HSV')
             break
     cv2.destroyAllWindows()
 
-    print(conn.get('threshold'))
+    print(thr)
 
-
-    original = gbv.StreamWindow('original', reciever)
-    threshold = gbv.StreamWindow(window_name='threshold', drawing_pipeline=conn.get('threshold'), wrap_object=reciever)
-
-    original.open()
+    threshold = gbv.StreamWindow('threshold', recieve, drawing_pipeline=thr)
     threshold.open()
+
     while True:
-        frame = reciever.get_frame()
-        if not original.show_frame(frame):
+        ok, frame = recieve.get_frame()
+        if not window.show_frame(frame):
             break
         if not threshold.show_frame(frame):
             break
 
-    original.close()
+    window.close()
     threshold.close()
 
 

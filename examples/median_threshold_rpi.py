@@ -8,30 +8,12 @@ stdv = np.array([40, 40, 40])
 
 
 def main():
-    broadcast = gbv.TCPStreamBroadcaster(5808, '192.168.1.60')
-    camera = gbv.USBCamera(0)
-    camera.set_exposure(-3)
-    conn = TableConn('192.168.1.8', 'calibrate')
-    conn.set('bbox', None)
-    streaming = True
+    broadcast = gbv.TCPStreamBroadcaster(5808)
+    stream_camera = gbv.USBStreamCamera(broadcast, 0)
+    stream_camera.set_exposure(-3)
+    stream_camera.toggle_stream(True)
     while True:
-        ok, frame = camera.read()
-        if streaming:
-            broadcast.send_frame(frame)
-        k = conn.get('key')
-        tr = conn.get('bbox')
-        if k == 'r':
-            streaming = False
-        if tr is not None:
-            thr = gbv.median_threshold(frame, stdv, tr, 'HSV')
-            break
-
-    conn.set('threshold', thr)
-
-    while True:
-        ok, frame = camera.read()
-        broadcast.send_frame(frame)
-
+        stream_camera.read()
 
 if __name__ == '__main__':
     main()
