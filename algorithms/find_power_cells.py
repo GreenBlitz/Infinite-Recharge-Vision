@@ -1,7 +1,7 @@
 import gbvision as gbv
 import numpy as np
 
-from constants import CONTOUR_MIN_AREA, SHAPE_LIFESPAN
+from constants.continuity import CONTOUR_MIN_AREA, SHAPE_LIFESPAN
 from constants.game_objects import POWER_CELL
 from constants.thresholds import POWER_CELL_THRESHOLD
 from .base_algorithm import BaseAlgorithm
@@ -13,13 +13,13 @@ class FindPowerCells(BaseAlgorithm):
 
     def __init__(self, output_key, success_key, conn, log_algorithm_incomplete=False):
         BaseAlgorithm.__init__(self, output_key, success_key, conn, log_algorithm_incomplete)
-
+        
         self.finder = gbv.CircleFinder(game_object=POWER_CELL, threshold_func=POWER_CELL_THRESHOLD,
                                        contour_min_area=CONTOUR_MIN_AREA)
         self.shaper = self.finder.find_shapes
         if BaseAlgorithm.DEBUG:
-            self.threshold = gbv.FeedWindow('threshold', drawing_pipeline=POWER_CELL_THRESHOLD)
-            self.window = gbv.FeedWindow('feed', drawing_pipeline=gbv.EMPTY_PIPELINE)
+            self.stream = None            
+
 
         self.continues = gbv.ContinuesShapeWrapper(finding_pipeline=self.shaper, frame=None, shapes=[],
                                                    shape_type='CIRCLE', shape_lifespan=SHAPE_LIFESPAN, track_new=True,
@@ -28,27 +28,22 @@ class FindPowerCells(BaseAlgorithm):
         self.closest_id = None
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
+        if self.DEBUG:
+            self.stream.send_frame(frame)
         power_cells = self.continues.find_shapes(frame)
         if len(power_cells) == 0:
             raise AlgorithmIncomplete()
         if self.closest_id is None or self.closest_id not in power_cells:
             self.closest_id = self.__get_optimal(power_cells, camera)
 
-        marked = frame
-        if BaseAlgorithm.DEBUG:
-            self.threshold.show_frame(frame)
-            if len(power_cells) > 0:
-                power_cells_list = self.continues.get_shapes_as_list()
-                marked = (gbv.PipeLine(
-                    lambda x: gbv.draw_circles(circs=power_cells_list, frame=x, color=(255, 0, 0), thickness=5),
-                    lambda x: gbv.draw_circles(circs=[power_cells[self.closest_id]], color=(0, 0, 255), frame=x,
-                                               thickness=5)))(
-                    frame)
-            self.window.show_frame(marked)
+        if self.DEBUG:
+            print(self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0])
         return self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0]
 
     def reset(self, camera: gbv.Camera):
-        camera.set_exposure(-5)
+        camera.set_exposure(11)
+        if self.DEBUG:
+            self.stream = gbv.TCPStreamBroadcaster(5809)
 
     def __get_optimal(self, shapes, camera):
         closest_id = None
