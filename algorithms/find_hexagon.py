@@ -13,6 +13,7 @@ class FindHexagon(BaseAlgorithm):
         self.finder = gbv.ContourFinder(game_object=OUTER_PORT, threshold_func=OUTER_PORT_THRESHOLD,
                                         contour_min_area=CONTOUR_MIN_AREA)
         self.window = gbv.FeedWindow('window')
+        self.threshold = gbv.FeedWindow('threshold', drawing_pipeline=OUTER_PORT_THRESHOLD)
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         """
@@ -22,6 +23,7 @@ class FindHexagon(BaseAlgorithm):
         """
         if BaseAlgorithm.DEBUG:
             self.window.show_frame(frame)
+            self.threshold.show_frame(frame)
         shapes = self.finder.find_shapes(frame)
         if len(shapes) == 0:
             raise AlgorithmIncomplete()

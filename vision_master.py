@@ -16,6 +16,7 @@ LOGGER_NAME = 'vision_master'
 def main():
     logger = Logger(LOGGER_NAME)
     conn = gbrpi.TableConn(ip=TABLE_IP, table_name=TABLE_NAME)
+    conn.set('algorithm', 'hexagon')
     logger.debug('initialized conn')
     camera = gbv.USBCamera(0, gbv.LIFECAM_3000)
     camera.rescale(0.5)
