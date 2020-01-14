@@ -27,7 +27,7 @@ def main():
     original.open()
     after_proc.open()
     while True:
-        frame = stream.get_frame()
+        ok, frame = stream.read()
         if not original.show_frame(frame):
             break
         if not after_proc.show_frame(frame):
