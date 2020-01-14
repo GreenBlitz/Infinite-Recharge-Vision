@@ -21,6 +21,7 @@ class FindPowerCells(BaseAlgorithm):
             self.stream = None            
 
 
+
         self.continues = gbv.ContinuesShapeWrapper(finding_pipeline=self.shaper, frame=None, shapes=[],
                                                    shape_type='CIRCLE', shape_lifespan=SHAPE_LIFESPAN, track_new=True,
                                                    tracker_type='MEDIANFLOW')
@@ -41,9 +42,11 @@ class FindPowerCells(BaseAlgorithm):
         return self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0]
 
     def reset(self, camera: gbv.Camera):
+        camera.set_auto_exposure(False)
         camera.set_exposure(11)
         if self.DEBUG:
             self.stream = gbv.TCPStreamBroadcaster(5809)
+
 
     def __get_optimal(self, shapes, camera):
         closest_id = None
