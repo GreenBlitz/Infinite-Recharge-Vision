@@ -11,7 +11,7 @@ from exceptions.algorithm_incomplete import AlgorithmIncomplete
 class BaseAlgorithm(abc.ABC):
     __registered = {}
     algorithm_name = None
-    DEBUG = False
+    DEBUG = True
 
     def __init_subclass__(cls, **kwargs):
         if cls.algorithm_name is None:

@@ -17,9 +17,12 @@ def main():
     logger = Logger(LOGGER_NAME)
     conn = gbrpi.TableConn(ip=TABLE_IP, table_name=TABLE_NAME)
     logger.debug('initialized conn')
-    camera = gbv.USBCamera(1, gbv.LIFECAM_3000)
+    camera = gbv.USBCamera(0, gbv.LIFECAM_3000)
+    camera.rescale(0.5)
     logger.debug('initialized camera')
 
+    conn.set('algorithm', 'power_cells')
+    
     all_algos = BaseAlgorithm.get_algorithms()
 
     possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, conn) for key in all_algos}
@@ -33,6 +36,7 @@ def main():
             if algo_type not in possible_algos:
                 logger.warning(f'Unknown algorithm type: {algo_type}')
             if algo_type != current_algo:
+                print(f'switched to: {algo_type}')
                 possible_algos[algo_type].reset(camera)
             algo = possible_algos[algo_type]
             algo(frame, camera)

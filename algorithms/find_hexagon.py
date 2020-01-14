@@ -32,4 +32,4 @@ class FindHexagon(BaseAlgorithm):
         return loc
 
     def reset(self, camera: gbv.Camera):
-        camera.set_exposure(-10)
+        camera.set_exposure(10)
