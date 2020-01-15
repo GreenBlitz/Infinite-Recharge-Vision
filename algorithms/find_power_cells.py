@@ -7,6 +7,7 @@ from constants.game_objects import POWER_CELL
 from constants.thresholds import POWER_CELL_THRESHOLD
 from .base_algorithm import BaseAlgorithm
 from exceptions.algorithm_incomplete import AlgorithmIncomplete
+from vision_master import HIGH_EXPOSURE
 
 
 class FindPowerCells(BaseAlgorithm):
@@ -44,7 +45,7 @@ class FindPowerCells(BaseAlgorithm):
 
     def reset(self, camera: gbv.Camera, led_ring: LedRing):
         camera.set_auto_exposure(False)
-        camera.set_exposure(11)
+        camera.set_exposure(HIGH_EXPOSURE)
         led_ring.off()
         
         if self.DEBUG:

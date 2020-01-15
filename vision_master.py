@@ -2,10 +2,17 @@ from logging import Logger
 
 import gbvision as gbv
 import gbrpi
-import numpy as np
+import os
 
 from algorithms import BaseAlgorithm
 
+PI_LOW_EXPOSURE = 10
+PI_HIGH_EXPOSURE = 11
+WINDOWS_LOW_EXPOSURE = -10
+WINDOWS_HIGH_EXPOSURE = -3
+ON_PI = os.name == 'posix'
+LOW_EXPOSURE = PI_LOW_EXPOSURE if ON_PI else WINDOWS_LOW_EXPOSURE
+HIGH_EXPOSURE = PI_HIGH_EXPOSURE if ON_PI else WINDOWS_HIGH_EXPOSURE
 LED_RING_PORT = 2
 TABLE_NAME = 'vision'
 TABLE_IP = '10.45.90.2'

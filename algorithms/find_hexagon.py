@@ -4,6 +4,7 @@ from gbrpi.electronics.led_ring import LedRing
 from constants import OUTER_PORT, OUTER_PORT_THRESHOLD, CONTOUR_MIN_AREA
 from exceptions.algorithm_incomplete import AlgorithmIncomplete
 from .base_algorithm import BaseAlgorithm
+from vision_master import LOW_EXPOSURE
 
 
 class FindHexagon(BaseAlgorithm):
@@ -35,7 +36,7 @@ class FindHexagon(BaseAlgorithm):
 
     def reset(self, camera: gbv.Camera, led_ring: LedRing):
         camera.set_auto_exposure(False)
-        camera.set_exposure(0)
+        camera.set_exposure(LOW_EXPOSURE)
         led_ring.on()
         if self.DEBUG:
             self.stream = gbv.TCPStreamBroadcaster(5809)
