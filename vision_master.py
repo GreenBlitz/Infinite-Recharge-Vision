@@ -13,6 +13,7 @@ WINDOWS_HIGH_EXPOSURE = -3
 ON_PI = os.name == 'posix'
 LOW_EXPOSURE = PI_LOW_EXPOSURE if ON_PI else WINDOWS_LOW_EXPOSURE
 HIGH_EXPOSURE = PI_HIGH_EXPOSURE if ON_PI else WINDOWS_HIGH_EXPOSURE
+CAMERA_PORT = 0 if ON_PI else 1
 LED_RING_PORT = 2
 TABLE_NAME = 'vision'
 TABLE_IP = '10.45.90.2'
@@ -26,7 +27,7 @@ def main():
     conn = gbrpi.TableConn(ip=TABLE_IP, table_name=TABLE_NAME)
     conn.set('algorithm', 'hexagon')
     logger.debug('initialized conn')
-    camera = gbv.USBCamera(0, gbv.LIFECAM_3000)
+    camera = gbv.USBCamera(CAMERA_PORT, gbv.LIFECAM_3000)
     camera.rescale(0.5)
     led_ring = gbrpi.electronics.led_ring.LedRing(LED_RING_PORT)
 
