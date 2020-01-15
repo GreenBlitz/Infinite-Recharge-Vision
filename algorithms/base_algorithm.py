@@ -4,6 +4,7 @@ from typing import Union, List, Iterable, Dict, Type
 
 import gbvision as gbv
 import gbrpi
+from gbrpi.electronics.led_ring import LedRing
 
 from exceptions.algorithm_incomplete import AlgorithmIncomplete
 
@@ -54,7 +55,7 @@ class BaseAlgorithm(abc.ABC):
         """
 
     @abc.abstractmethod
-    def reset(self, camera: gbv.Camera):
+    def reset(self, camera: gbv.Camera, led_ring: LedRing):
         """
 
         :return:

@@ -1,6 +1,7 @@
 import gbvision as gbv
 import numpy as np
 
+from gbrpi.electronics.led_ring import LedRing
 from constants.continuity import CONTOUR_MIN_AREA, SHAPE_LIFESPAN
 from constants.game_objects import POWER_CELL
 from constants.thresholds import POWER_CELL_THRESHOLD
@@ -41,9 +42,11 @@ class FindPowerCells(BaseAlgorithm):
             print(self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0])
         return self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0]
 
-    def reset(self, camera: gbv.Camera):
+    def reset(self, camera: gbv.Camera, led_ring: LedRing):
         camera.set_auto_exposure(False)
         camera.set_exposure(11)
+        led_ring.off()
+        
         if self.DEBUG:
             self.stream = gbv.TCPStreamBroadcaster(5809)
 
