@@ -2,12 +2,12 @@ import gbvision as gbv
 import numpy as np
 
 from gbrpi.electronics.led_ring import LedRing
+
+from constants import HIGH_EXPOSURE
 from constants.continuity import CONTOUR_MIN_AREA, SHAPE_LIFESPAN
 from constants.game_objects import POWER_CELL
 from constants.thresholds import POWER_CELL_THRESHOLD
 from .base_algorithm import BaseAlgorithm
-from exceptions.algorithm_incomplete import AlgorithmIncomplete
-from vision_master import HIGH_EXPOSURE
 
 
 class FindPowerCells(BaseAlgorithm):
@@ -15,14 +15,10 @@ class FindPowerCells(BaseAlgorithm):
 
     def __init__(self, output_key, success_key, conn, log_algorithm_incomplete=False):
         BaseAlgorithm.__init__(self, output_key, success_key, conn, log_algorithm_incomplete)
-        
+
         self.finder = gbv.CircleFinder(game_object=POWER_CELL, threshold_func=POWER_CELL_THRESHOLD,
                                        contour_min_area=CONTOUR_MIN_AREA)
         self.shaper = self.finder.find_shapes
-        if BaseAlgorithm.DEBUG:
-            self.stream = None            
-
-
 
         self.continues = gbv.ContinuesShapeWrapper(finding_pipeline=self.shaper, frame=None, shapes=[],
                                                    shape_type='CIRCLE', shape_lifespan=SHAPE_LIFESPAN, track_new=True,
@@ -31,26 +27,20 @@ class FindPowerCells(BaseAlgorithm):
         self.closest_id = None
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
-        if self.DEBUG:
-            self.stream.send_frame(frame)
         power_cells = self.continues.find_shapes(frame)
         if len(power_cells) == 0:
-            raise AlgorithmIncomplete()
+            raise self.AlgorithmIncomplete()
         if self.closest_id is None or self.closest_id not in power_cells:
             self.closest_id = self.__get_optimal(power_cells, camera)
 
-        if self.DEBUG:
-            print(self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0])
-        return self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0]
+        loc = self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0]
+        self.logger.debug(loc)
+        return loc
 
     def reset(self, camera: gbv.Camera, led_ring: LedRing):
         camera.set_auto_exposure(False)
         camera.set_exposure(HIGH_EXPOSURE)
         led_ring.off()
-        
-        if self.DEBUG:
-            self.stream = gbv.TCPStreamBroadcaster(5809)
-
 
     def __get_optimal(self, shapes, camera):
         closest_id = None

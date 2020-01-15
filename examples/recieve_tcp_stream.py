@@ -1,8 +1,10 @@
 import gbvision as gbv
 
+from constants import TCP_STREAM_IP, TCP_STREAM_PORT
+
 
 def main():
-    receiver = gbv.TCPStreamReceiver('192.168.1.8', 5809)
+    receiver = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)
     window = gbv.StreamWindow(window_name='stream example', wrap_object=receiver)
     window.show()
 

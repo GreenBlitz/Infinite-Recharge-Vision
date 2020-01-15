@@ -1,46 +1,54 @@
-from logging import Logger
-
 import gbvision as gbv
 import gbrpi
-import os
 
 from algorithms import BaseAlgorithm
+from constants import CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT
+from constants import TABLE_IP, TABLE_NAME, OUTPUT_KEY, SUCCESS_KEY
+from tools.system import is_on_rpi
+from utils.gblogger import GBLogger
 
-PI_LOW_EXPOSURE = 10
-PI_HIGH_EXPOSURE = 11
-WINDOWS_LOW_EXPOSURE = -10
-WINDOWS_HIGH_EXPOSURE = -3
-ON_PI = os.name == 'posix'
-LOW_EXPOSURE = PI_LOW_EXPOSURE if ON_PI else WINDOWS_LOW_EXPOSURE
-HIGH_EXPOSURE = PI_HIGH_EXPOSURE if ON_PI else WINDOWS_HIGH_EXPOSURE
-CAMERA_PORT = 0 if ON_PI else 1
-LED_RING_PORT = 2
-TABLE_NAME = 'vision'
-TABLE_IP = '10.45.90.2'
-OUTPUT_KEY = 'output'
-SUCCESS_KEY = 'found'
 LOGGER_NAME = 'vision_master'
 
 
+class __EmptyLedRing:
+    def __init__(self, port):
+        pass
+
+    def on(self):
+        pass
+
+    def off(self):
+        pass
+
+
+LedRing = gbrpi.LedRing if is_on_rpi() else __EmptyLedRing
+
+
 def main():
-    logger = Logger(LOGGER_NAME)
+    logger = GBLogger(LOGGER_NAME, use_file=True)
+    logger.allow_debug = BaseAlgorithm.DEBUG
     conn = gbrpi.TableConn(ip=TABLE_IP, table_name=TABLE_NAME)
-    conn.set('algorithm', 'hexagon')
-    logger.debug('initialized conn')
-    camera = gbv.USBCamera(CAMERA_PORT, gbv.LIFECAM_3000)
-    camera.rescale(0.5)
-    led_ring = gbrpi.electronics.led_ring.LedRing(LED_RING_PORT)
+    led_ring = LedRing(LED_RING_PORT)
+    logger.info('initialized conn')
+    if BaseAlgorithm.DEBUG:
+        camera = gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), CAMERA_PORT, data=gbv.LIFECAM_3000)
+        camera.toggle_stream(True)
+    else:
+        camera = gbv.USBCamera(CAMERA_PORT, gbv.LIFECAM_3000)  # rotate the camera here if needed
+    camera.set_auto_exposure(False)
+    # camera.rescale(0.5)
+    logger.info('initialized camera')
 
-    logger.debug('initialized camera')
-
-    conn.set('algorithm', 'hexagon')
-    
     all_algos = BaseAlgorithm.get_algorithms()
+
+    logger.debug(f'Algorithms: {", ".join(all_algos)}')
 
     possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, conn) for key in all_algos}
     current_algo = None
 
     logger.info('starting...')
+    conn.set('algorithm', 'hexagon')
+
     while True:
         ok, frame = camera.read()
         algo_type = conn.get('algorithm')
@@ -48,7 +56,7 @@ def main():
             if algo_type not in possible_algos:
                 logger.warning(f'Unknown algorithm type: {algo_type}')
             if algo_type != current_algo:
-                print(f'switched to: {algo_type}')
+                logger.debug(f'switched to algorithm: {algo_type}')
                 possible_algos[algo_type].reset(camera, led_ring)
             algo = possible_algos[algo_type]
             algo(frame, camera)
