@@ -1,1 +1,1 @@
-wsl ./upload.sh
+scp -r %cd% pi@frcvision.local:~/vision
