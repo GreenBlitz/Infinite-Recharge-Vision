@@ -5,7 +5,7 @@ import gbvision as gbv
 
 from constants import TCP_STREAM_IP, TCP_STREAM_PORT
 
-stdv = np.array([40, 40, 40])
+stdv = np.array([40, 40, 20])
 
 
 def main():
@@ -16,13 +16,13 @@ def main():
         k = window.last_key_pressed
         if k == 'r':
             bbox = cv2.selectROI('feed', frame)
-            thr = gbv.median_threshold(frame, stdv, bbox, gbv.ColorThreshold.THRESH_TYPE_HSV)
+            thr = gbv.median_threshold(frame, stdv, bbox, gbv.ColorThreshold.THRESH_TYPE_HLS)
             break
     cv2.destroyAllWindows()
 
     print(thr)
 
-    threshold = gbv.StreamWindow('threshold', receive, drawing_pipeline=thr)
+    threshold = gbv.StreamWindow('threshold', receive, drawing_pipeline=thr + gbv.Erode(10) + gbv.Dilate(10))
     threshold.open()
 
     while True:
