@@ -47,7 +47,7 @@ def main():
     current_algo = None
 
     logger.info('starting...')
-    conn.set('algorithm', 'hexagon')
+    conn.set('algorithm', 'feeding_station')
 
     while True:
         ok, frame = camera.read()
