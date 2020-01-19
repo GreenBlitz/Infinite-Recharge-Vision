@@ -5,11 +5,11 @@ import gbvision as gbv
 
 from constants import TCP_STREAM_IP, TCP_STREAM_PORT
 
-stdv = np.array([40, 40, 20])
+stdv = np.array([40, 40, 40])
 
 
 def main():
-    receive = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)
+    receive = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT, fx=1.5, fy=1.5)
     window = gbv.StreamWindow('feed', receive)
     while True:
         frame = window.show_and_get_frame()
@@ -22,7 +22,7 @@ def main():
 
     print(thr)
 
-    threshold = gbv.StreamWindow('threshold', receive, drawing_pipeline=thr + gbv.Erode(10) + gbv.Dilate(10))
+    threshold = gbv.StreamWindow('threshold', receive, drawing_pipeline=thr)
     threshold.open()
 
     while True:
