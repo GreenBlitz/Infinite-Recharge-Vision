@@ -1,7 +1,7 @@
 import gbvision as gbv
 from gbrpi.electronics.led_ring import LedRing
 
-from constants import OUTER_PORT, FEEDING_STATION, OUTER_PORT_THRESHOLD, FEEDING_STATION_THRESHOLD, CONTOUR_MIN_AREA, LOW_EXPOSURE
+from constants import FEEDING_STATION, FEEDING_STATION_THRESHOLD, CONTOUR_MIN_AREA, LOW_EXPOSURE
 from .base_algorithm import BaseAlgorithm
 
 
@@ -11,7 +11,7 @@ class FindFeeding(BaseAlgorithm):
     def __init__(self, output_key, success_key, conn, log_algorithm_incomplete=False):
         BaseAlgorithm.__init__(self, output_key, success_key, conn, log_algorithm_incomplete)
         self.finder = gbv.RectFinder(game_object=FEEDING_STATION, threshold_func=FEEDING_STATION_THRESHOLD,
-                                        contour_min_area=CONTOUR_MIN_AREA)
+                                     contour_min_area=CONTOUR_MIN_AREA)
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         """
