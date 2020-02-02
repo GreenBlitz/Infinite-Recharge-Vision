@@ -12,6 +12,8 @@ class FindFeeding(BaseAlgorithm):
         BaseAlgorithm.__init__(self, output_key, success_key, conn, log_algorithm_incomplete)
         self.finder = gbv.RectFinder(game_object=FEEDING_STATION, threshold_func=FEEDING_STATION_THRESHOLD,
                                         contour_min_area=CONTOUR_MIN_AREA)
+        if BaseAlgorithm.DEBUG:
+            self.window = gbv.FeedWindow("win")
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         """
@@ -25,6 +27,9 @@ class FindFeeding(BaseAlgorithm):
         square = shapes[0]
         loc = self.finder.locations_from_shapes([square], camera)[0]
         self.logger.debug(loc)
+        if BaseAlgorithm.DEBUG:
+            self.window.show_frame(frame)
+            
         return loc
 
     def reset(self, camera: gbv.Camera, led_ring: LedRing):
