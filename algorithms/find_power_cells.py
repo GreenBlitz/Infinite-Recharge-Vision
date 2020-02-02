@@ -38,8 +38,7 @@ class FindPowerCells(BaseAlgorithm):
         return loc
 
     def reset(self, camera: gbv.Camera, led_ring: LedRing):
-        camera.set_auto_exposure(False)
-        camera.set_exposure(HIGH_EXPOSURE)
+        camera.set_auto_exposure(True)
         led_ring.off()
 
     def __get_optimal(self, shapes, camera):
