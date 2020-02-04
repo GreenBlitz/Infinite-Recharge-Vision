@@ -2,7 +2,8 @@ import gbvision as gbv
 
 from constants import TCP_STREAM_IP, TCP_STREAM_PORT
 
-REMOTE_THRESHOLD = gbv.ColorThreshold([[0, 39], [113, 193], [74, 154]], 'HLS') + gbv.Dilate(3)
+REMOTE_THRESHOLD = gbv.ColorThreshold([[63, 103], [7, 167], [157, 255]], 'HLS')
+
 
 def main():
     receiver = gbv.AsyncTCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)

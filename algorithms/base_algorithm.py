@@ -1,5 +1,4 @@
 import abc
-import traceback
 from typing import Union, List, Iterable, Dict, Type
 
 import gbvision as gbv
