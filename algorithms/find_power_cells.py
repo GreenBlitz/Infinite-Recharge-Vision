@@ -3,7 +3,7 @@ import numpy as np
 
 from gbrpi.electronics.led_ring import LedRing
 
-from constants import HIGH_EXPOSURE
+from constants import HIGH_EXPOSURE, RADIUS_SCALAR
 from constants.continuity import CONTOUR_MIN_AREA, SHAPE_LIFESPAN
 from constants.game_objects import POWER_CELL
 from constants.thresholds import POWER_CELL_THRESHOLD
@@ -17,7 +17,7 @@ class FindPowerCells(BaseAlgorithm):
         BaseAlgorithm.__init__(self, output_key, success_key, conn, log_algorithm_incomplete)
 
         self.finder = gbv.CircleFinder(game_object=POWER_CELL, threshold_func=POWER_CELL_THRESHOLD,
-                                       contour_min_area=CONTOUR_MIN_AREA)
+                                       contour_min_area=CONTOUR_MIN_AREA, area_scalar=RADIUS_SCALAR)
         self.shaper = self.finder.find_shapes
 
         self.continues = gbv.ContinuesShapeWrapper(finding_pipeline=self.shaper, frame=None, shapes=[],

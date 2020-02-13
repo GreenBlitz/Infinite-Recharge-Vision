@@ -10,7 +10,7 @@ it finds the best constants for the erode and dilate denoising function in the b
 '''
 
 # insert constants in the following variables:
-THRESHOLD = gbv.ColorThreshold([[69, 109], [43, 123], [212, 255]], 'HLS')
+THRESHOLD = gbv.ColorThreshold([[0, 65], [178, 255], [107, 187]], 'HSV')
 # the threshold function used to detect the object
 GAME_OBJECT = OUTER_PORT  # the game object object of the wanted game object
 CAMERA = gbv.EmptyCamera(gbv.LIFECAM_3000, 640, 480)  # the camera used to detect the object
@@ -30,9 +30,9 @@ def calculate_distance(erode: int, dilate: int, frame: gbv.Frame, should_print=T
 
 
 def main():
-    stream = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)
-    # stream = gbv.USBCamera(1, gbv.LIFECAM_3000)
-    # stream.set_exposure(-5)
+    #stream = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)
+    stream = gbv.USBCamera(0, gbv.LIFECAM_3000)
+    stream.set_exposure(-5)
     threshold = ReadableWindow('threshold', wrap_object=stream, drawing_pipeline=THRESHOLD)
     window = ReadableWindow(window_name='feed', wrap_object=stream,
                             drawing_pipeline=gbv.DrawContours(threshold_func=THRESHOLD, color=(0, 255, 0)))
