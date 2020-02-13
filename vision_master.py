@@ -2,7 +2,8 @@ import gbvision as gbv
 import gbrpi
 
 from algorithms import BaseAlgorithm
-from constants import CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT
+from constants import CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, PITCH_ANGLE, YAW_ANGLE, ROLL_ANGLE, X_OFFSET, \
+    Y_OFFSET, Z_OFFSET
 from constants import TABLE_IP, TABLE_NAME, OUTPUT_KEY, SUCCESS_KEY
 from tools.system import is_on_rpi
 from utils.gblogger import GBLogger
@@ -30,11 +31,19 @@ def main():
     conn = gbrpi.TableConn(ip=TABLE_IP, table_name=TABLE_NAME)
     led_ring = LedRing(LED_RING_PORT)
     logger.info('initialized conn')
+    data = gbv.LIFECAM_3000.rotate_pitch(PITCH_ANGLE). \
+        rotate_yaw(YAW_ANGLE). \
+        rotate_roll(ROLL_ANGLE). \
+        move_x(X_OFFSET). \
+        move_y(Y_OFFSET). \
+        move_z(Z_OFFSET)
     if BaseAlgorithm.DEBUG:
-        camera = gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), CAMERA_PORT, data=gbv.LIFECAM_3000)
+        logger.info('running on debug mode, waiting for a stream receiver to connect...')
+        camera = gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), CAMERA_PORT, data=data)
+        logger.info('initialized stream')
         camera.toggle_stream(True)
     else:
-        camera = gbv.USBCamera(CAMERA_PORT, gbv.LIFECAM_3000)  # rotate the camera here if needed
+        camera = gbv.USBCamera(CAMERA_PORT, data=data)
     camera.set_auto_exposure(False)
     # camera.rescale(0.5)
     logger.info('initialized camera')
@@ -47,7 +56,6 @@ def main():
     current_algo = None
 
     logger.info('starting...')
-    conn.set('algorithm', 'feeding_station')
 
     while True:
         ok, frame = camera.read()

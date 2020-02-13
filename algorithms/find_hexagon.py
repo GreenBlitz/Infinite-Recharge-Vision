@@ -10,8 +10,8 @@ class FindHexagon(BaseAlgorithm):
 
     def __init__(self, output_key, success_key, conn, log_algorithm_incomplete=False):
         BaseAlgorithm.__init__(self, output_key, success_key, conn, log_algorithm_incomplete)
-        self.finder = gbv.ContourFinder(game_object=OUTER_PORT, threshold_func=OUTER_PORT_THRESHOLD,
-                                        contour_min_area=CONTOUR_MIN_AREA)
+        self.finder = gbv.CircleFinder(game_object=OUTER_PORT, threshold_func=OUTER_PORT_THRESHOLD,
+                                       contour_min_area=CONTOUR_MIN_AREA)
 
     def _process(self, frame: gbv.Frame, camera: gbv.Camera):
         """
