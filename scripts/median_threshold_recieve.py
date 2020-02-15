@@ -9,7 +9,7 @@ stdv = np.array([5, 40, 40])
 
 
 def main():
-    receive = gbv.TCPStreamReceiver('frcvision.local', TCP_STREAM_PORT, fx=1.5, fy=1.5)
+    receive = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT, fx=1.5, fy=1.5)
     window = gbv.StreamWindow('feed', receive)
     while True:
         frame = window.show_and_get_frame()
