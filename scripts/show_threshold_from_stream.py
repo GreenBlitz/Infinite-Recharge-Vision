@@ -1,8 +1,10 @@
 import gbvision as gbv
+import cv2
 
 from constants import TCP_STREAM_IP, TCP_STREAM_PORT
 
-REMOTE_THRESHOLD = gbv.ColorThreshold([[63, 103], [7, 167], [157, 255]], 'HLS')
+REMOTE_THRESHOLD = gbv.PipeLine(lambda x: cv2.GaussianBlur(x, (11, 11), cv2.BORDER_DEFAULT)) + gbv.ColorThreshold(
+    [[19, 29], [0, 53], [215, 255]], 'HLS') + gbv.Erode(5) + gbv.Dilate(9) + gbv.MedianBlur(13)
 
 
 def main():
