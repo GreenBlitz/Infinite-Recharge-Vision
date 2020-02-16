@@ -19,7 +19,7 @@ def update_time():
     global seconds_left, minutes_left, start_time
     if int(time.time()) - int(start_time) != 0:
         start_time += 1
-        print(f'start: {int(start_time)}\ncurrtime:{int(time.time())}\nsub: {int(time.time()) - int(start_time)}\n\n\n')
+        # print(f'start: {int(start_time)}\ncurrtime:{int(time.time())}\nsub: {int(time.time()) - int(start_time)}\n\n\n')
         if seconds_left == 0:
             seconds_left = 59
             minutes_left -= 1
@@ -40,7 +40,7 @@ def draw(frame: gbv.Frame):
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=gear, coords=gear_coord, font_scale=2, thickness=5)
     frame = gbv.draw_text(frame, color=(255, 255, 255), text=gear, coords=gear_coord, font_scale=2, thickness=1)
 
-    found = conn.get('valid')
+    found = conn.get('found')
     found_coord = 20, 20
     if found:
         frame = gbv.draw_circles(frame, color=(0, 255, 0), circs=[(found_coord, 10)], thickness=20)
