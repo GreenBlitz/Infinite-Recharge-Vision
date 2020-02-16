@@ -21,8 +21,12 @@ def update_time():
         start_time += 1
         # print(f'start: {int(start_time)}\ncurrtime:{int(time.time())}\nsub: {int(time.time()) - int(start_time)}\n\n\n')
         if seconds_left == 0:
-            seconds_left = 59
-            minutes_left -= 1
+            if minutes_left != 0:
+                seconds_left = 59
+                minutes_left -= 1
+            else:
+                minutes_left = 0
+                seconds_left = 0
         else:
             seconds_left -= 1
 
