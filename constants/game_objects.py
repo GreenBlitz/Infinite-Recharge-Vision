@@ -1,5 +1,0 @@
-import gbvision as gbv
-
-OUTER_PORT = gbv.GameObject(0.9039514639618131)  # gbv.GameObject(0.2590849281606323)
-POWER_CELL = gbv.GameObject(0.1575711473271677)
-FEEDING_STATION = gbv.GameObject(0.224499443206436)
