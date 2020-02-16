@@ -31,24 +31,25 @@ def draw(frame: gbv.Frame):
     global seconds_left, minutes_left, start_time, conn
     update_time()
     timer_coord = 10, 9 * frame.shape[0] // 10
-    time_left = f"0{minutes_left}:{seconds_left if seconds_left > 9 else f'0{seconds_left}'}"
+    time_left = f"0{max(0, minutes_left)}:{max(0, seconds_left) if seconds_left > 9 else f'0{max(0, seconds_left)}'}"
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=time_left, coords=timer_coord, font_scale=2, thickness=5)
     frame = gbv.draw_text(frame, color=(255, 255, 255), text=time_left, coords=timer_coord, font_scale=2, thickness=1)
 
-    gear = 'POWER' if conn.get('shifter_state') == 'power' else 'SPEED'
+    gear = conn.get('shifter_state', 'power').upper()
     gear_coord = 400, 9 * frame.shape[0] // 10
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=gear, coords=gear_coord, font_scale=2, thickness=5)
     frame = gbv.draw_text(frame, color=(255, 255, 255), text=gear, coords=gear_coord, font_scale=2, thickness=1)
 
     found = conn.get('valid')
     found_coord = 20, 20
-    color = (0, 255, 0) if found else (0, 0, 255)
-    frame = gbv.draw_circles(frame, color=color, circs=[(found_coord, 10)], thickness=20)
+    if found:
+        frame = gbv.draw_circles(frame, color=(0, 255, 0), circs=[(found_coord, 10)], thickness=20)
 
     shooter_speed = str(int(shooter_conn.get('Velocity')))
     shooter_coord = 450, 50
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=shooter_speed, coords=shooter_coord, font_scale=2, thickness=5)
-    frame = gbv.draw_text(frame, color=(255, 255, 255), text=shooter_speed, coords=shooter_coord, font_scale=2, thickness=1)
+    frame = gbv.draw_text(frame, color=(255, 255, 255), text=shooter_speed, coords=shooter_coord, font_scale=2,
+                          thickness=1)
 
     return frame
 
@@ -69,7 +70,8 @@ def on_game_state_change(new_state: str):
 
 def main():
     stream = gbv.AsyncTCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)
-    #stream = gbv.USBCamera(0)
+    stream.wait_start_reading()
+    # stream = gbv.USBCamera(0)
     conn.add_entry_change_listener(on_game_state_change, 'game_state')
     files = os.listdir('records/')
     if len(files) == 0:
