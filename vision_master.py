@@ -1,8 +1,9 @@
 import gbvision as gbv
 import gbrpi
 
-from algorithms import BaseAlgorithm
-from constants import CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, PITCH_ANGLE, YAW_ANGLE, ROLL_ANGLE, X_OFFSET, \
+from algorithms import BaseAlgorithm, find_hexagon, find_feeding, find_power_cells
+from constants import HEX_CAMERA_PORT, STREAM_CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, PITCH_ANGLE, YAW_ANGLE, \
+    ROLL_ANGLE, X_OFFSET, \
     Y_OFFSET, Z_OFFSET
 from constants import TABLE_IP, TABLE_NAME, OUTPUT_KEY, SUCCESS_KEY
 from tools.system import is_on_rpi
@@ -22,8 +23,16 @@ class __EmptyLedRing:
         pass
 
 
-LedRing = gbrpi.LedRing if is_on_rpi() else __EmptyLedRing
+def cam_by_algo(algo):
+    """
+    :param algo: algorithm requiring camera
+    :return: camera required for algorithm
+    """
+    return camera if algo == find_hexagon.FindHexagon else camera[1]
 
+
+LedRing = gbrpi.LedRing if is_on_rpi() else __EmptyLedRing
+camera = gbv.CameraList([])
 
 def main():
     logger = GBLogger(LOGGER_NAME, use_file=True)
@@ -39,12 +48,17 @@ def main():
         move_z(Z_OFFSET)
     if BaseAlgorithm.DEBUG:
         logger.info('running on debug mode, waiting for a stream receiver to connect...')
-        camera = gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), CAMERA_PORT, data=data)
+        camera.add_camera(gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), STREAM_CAMERA_PORT, data=data))
+
         logger.info('initialized stream')
         camera.toggle_stream(True)
+
     else:
-        camera = gbv.USBCamera(CAMERA_PORT, data=data)
+        camera.add_camera(gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), STREAM_CAMERA_PORT, data=data))
+        camera.add_camera(gbv.USBCamera(HEX_CAMERA_PORT, data=data))
+
     camera.set_auto_exposure(False)
+    camera[1].set_auto_exposure(False)
     # camera.rescale(0.5)
     logger.info('initialized camera')
 
@@ -65,9 +79,9 @@ def main():
                 logger.warning(f'Unknown algorithm type: {algo_type}')
             if algo_type != current_algo:
                 logger.debug(f'switched to algorithm: {algo_type}')
-                possible_algos[algo_type].reset(camera, led_ring)
+                possible_algos[algo_type].reset(cam_by_algo(algo_type), led_ring)
             algo = possible_algos[algo_type]
-            algo(frame, camera)
+            algo(frame, cam_by_algo(algo_type))
         current_algo = algo_type
 
 
