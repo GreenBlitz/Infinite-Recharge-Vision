@@ -21,8 +21,9 @@ class FindPowerCells(BaseAlgorithm):
         self.shaper = self.finder.find_shapes
 
         self.continues = gbv.ContinuesShapeWrapper(finding_pipeline=self.shaper, frame=None, shapes=[],
-                                                   shape_type='CIRCLE', shape_lifespan=SHAPE_LIFESPAN, track_new=True,
-                                                   tracker_type='MEDIANFLOW')
+                                                   shape_type=gbv.ContinuesShapeWrapper.SHAPE_TYPE_CIRCLE,
+                                                   shape_lifespan=SHAPE_LIFESPAN, track_new=True,
+                                                   tracker_type=gbv.Tracker.TRACKER_TYPE_EMPTY)
         self.found_cell = False
         self.closest_id = None
 
@@ -59,4 +60,3 @@ class FindPowerCells(BaseAlgorithm):
         camera.set_auto_exposure(False)
         camera.set_exposure(HIGH_EXPOSURE)
         led_ring.off()
-
