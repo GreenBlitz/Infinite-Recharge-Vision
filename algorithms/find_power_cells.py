@@ -37,12 +37,6 @@ class FindPowerCells(BaseAlgorithm):
         self.logger.debug(loc)
         return loc
 
-    def reset(self, camera: gbv.CameraList, led_ring: LedRing):
-        camera.select_camera(STREAM_CAMERA_INDEX)
-        camera.set_auto_exposure(False)
-        camera.set_exposure(HIGH_EXPOSURE)
-        led_ring.off()
-
     def __get_optimal(self, shapes, camera):
         closest_id = None
         current_cost = -1
@@ -59,3 +53,10 @@ class FindPowerCells(BaseAlgorithm):
                 current_cost = tmp_cost
 
         return closest_id
+
+    def reset(self, camera: gbv.CameraList, led_ring: LedRing):
+        camera.select_camera(STREAM_CAMERA_INDEX)
+        camera.set_auto_exposure(False)
+        camera.set_exposure(HIGH_EXPOSURE)
+        led_ring.off()
+
