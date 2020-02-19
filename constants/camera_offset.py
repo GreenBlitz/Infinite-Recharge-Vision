@@ -1,10 +1,18 @@
 # all camera offset constants go in this file
 import numpy as np
 
-YAW_ANGLE = np.deg2rad(0)
-PITCH_ANGLE = np.deg2rad(17)
-ROLL_ANGLE = np.deg2rad(0)
+STREAM_YAW_ANGLE = np.deg2rad(0)
+STREAM_PITCH_ANGLE = np.deg2rad(0)
+STREAM_ROLL_ANGLE = np.deg2rad(0)
 
-X_OFFSET = 0
-Y_OFFSET = 0
-Z_OFFSET = 0
+HEX_YAW_ANGLE = np.deg2rad(0)
+HEX_PITCH_ANGLE = np.deg2rad(0)
+HEX_ROLL_ANGLE = np.deg2rad(0)
+
+HEX_X_OFFSET = 0
+HEX_Y_OFFSET = 0
+HEX_Z_OFFSET = 0
+
+STREAM_X_OFFSET = 0
+STREAM_Y_OFFSET = 0
+STREAM_Z_OFFSET = 0
