@@ -2,11 +2,11 @@
 import numpy as np
 
 STREAM_YAW_ANGLE = np.deg2rad(0)
-STREAM_PITCH_ANGLE = np.deg2rad(17)
+STREAM_PITCH_ANGLE = np.deg2rad(0)
 STREAM_ROLL_ANGLE = np.deg2rad(0)
 
 HEX_YAW_ANGLE = np.deg2rad(0)
-HEX_PITCH_ANGLE = np.deg2rad(17)
+HEX_PITCH_ANGLE = np.deg2rad(0)
 HEX_ROLL_ANGLE = np.deg2rad(0)
 
 HEX_X_OFFSET = 0
