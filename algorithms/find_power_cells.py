@@ -3,7 +3,7 @@ import numpy as np
 
 from gbrpi.electronics.led_ring import LedRing
 
-from constants import HIGH_EXPOSURE, RADIUS_SCALAR
+from constants import HIGH_EXPOSURE, RADIUS_SCALAR, STREAM_CAMERA_INDEX
 from constants.continuity import CONTOUR_MIN_AREA, SHAPE_LIFESPAN
 from constants.game_objects import POWER_CELL
 from constants.thresholds import POWER_CELL_THRESHOLD
@@ -37,7 +37,8 @@ class FindPowerCells(BaseAlgorithm):
         self.logger.debug(loc)
         return loc
 
-    def reset(self, camera: gbv.Camera, led_ring: LedRing):
+    def reset(self, camera: gbv.CameraList, led_ring: LedRing):
+        camera.select_camera(STREAM_CAMERA_INDEX)
         camera.set_auto_exposure(False)
         camera.set_exposure(HIGH_EXPOSURE)
         led_ring.off()

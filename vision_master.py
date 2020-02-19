@@ -2,7 +2,8 @@ import gbvision as gbv
 import gbrpi
 
 from algorithms import BaseAlgorithm, find_hexagon, find_feeding, find_power_cells
-from constants import HEX_CAMERA_PORT, STREAM_CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, STREAM_PITCH_ANGLE, STREAM_YAW_ANGLE, \
+from constants import HEX_CAMERA_PORT, STREAM_CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, STREAM_PITCH_ANGLE, \
+    STREAM_YAW_ANGLE, \
     STREAM_ROLL_ANGLE, STREAM_X_OFFSET, \
     STREAM_Y_OFFSET, STREAM_Z_OFFSET, HEX_PITCH_ANGLE, HEX_YAW_ANGLE, \
     HEX_ROLL_ANGLE, HEX_X_OFFSET, \
@@ -56,19 +57,17 @@ def main():
         move_x(STREAM_X_OFFSET). \
         move_y(STREAM_Y_OFFSET). \
         move_z(STREAM_Z_OFFSET)
+
+    camera.add_camera(
+        gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), STREAM_CAMERA_PORT, data=stream_data))
+    camera.add_camera(gbv.USBCamera(HEX_CAMERA_PORT, data=hex_data))
+
     if BaseAlgorithm.DEBUG:
         logger.info('running on debug mode, waiting for a stream receiver to connect...')
-        camera.add_camera(gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), STREAM_CAMERA_PORT, data=data))
-
         logger.info('initialized stream')
         camera.toggle_stream(True)
 
-    else:
-        camera.add_camera(gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), STREAM_CAMERA_PORT, data=data))
-        camera.add_camera(gbv.USBCamera(HEX_CAMERA_PORT, data=data))
-
-    camera.set_auto_exposure(False)
-    camera[1].set_auto_exposure(False)
+    camera.set_auto_exposure(False, foreach=True)
     # camera.rescale(0.5)
     logger.info('initialized camera')
 
@@ -89,9 +88,9 @@ def main():
                 logger.warning(f'Unknown algorithm type: {algo_type}')
             if algo_type != current_algo:
                 logger.debug(f'switched to algorithm: {algo_type}')
-                possible_algos[algo_type].reset(cam_by_algo(algo_type), led_ring)
+                possible_algos[algo_type].reset(camera, led_ring)
             algo = possible_algos[algo_type]
-            algo(frame, cam_by_algo(algo_type))
+            algo(frame, camera)
         current_algo = algo_type
 
 
