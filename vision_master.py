@@ -28,14 +28,6 @@ class __EmptyLedRing:
         pass
 
 
-def cam_by_algo(algo):
-    """
-    :param algo: algorithm requiring camera
-    :return: camera required for algorithm
-    """
-    return camera if algo == find_hexagon.FindHexagon else camera[1]
-
-
 LedRing = gbrpi.LedRing if is_on_rpi() else __EmptyLedRing
 camera = gbv.CameraList([])
 
