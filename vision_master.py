@@ -62,15 +62,12 @@ def main():
         cam.wait_start_reading()
         streamer = gbv.TCPStreamBroadcaster(TCP_STREAM_PORT, use_grayscale=STREAM_USE_GRAYSCALE,
                                             max_bitrate=STREAM_MAX_BITRATE, fx=STREAM_FX, fy=STREAM_FY)
+        logger.info("initialized streamer")
         while True:
             _ok, _frame = cam.read()
             streamer.send_frame(_frame)
 
     Thread(target=__stream_thread).start()
-
-    if BaseAlgorithm.DEBUG:
-        logger.info('running on debug mode, waiting for a stream receiver to connect...')
-        logger.info('initialized stream')
 
     camera.set_auto_exposure(False, foreach=True)
     # camera.rescale(0.5)
