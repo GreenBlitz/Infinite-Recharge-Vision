@@ -94,16 +94,20 @@ def main():
     logger.info('starting...')
 
     while True:
-        ok, frame = camera.read()
         algo_type = conn.get('algorithm')
         if algo_type is not None:
             if algo_type not in possible_algos:
                 logger.warning(f'Unknown algorithm type: {algo_type}')
+                continue
+            algo = possible_algos[algo_type]
             if algo_type != current_algo:
                 logger.debug(f'switched to algorithm: {algo_type}')
-                possible_algos[algo_type].reset(camera, led_ring)
-            algo = possible_algos[algo_type]
-            algo(frame, camera)
+                algo.reset(camera, led_ring)
+            ok, frame = camera.read()
+            if ok:
+                algo(frame, camera)
+            else:
+                logger.warning(f'frame not read from camera during algorithm: {algo_type}')
         current_algo = algo_type
 
 
