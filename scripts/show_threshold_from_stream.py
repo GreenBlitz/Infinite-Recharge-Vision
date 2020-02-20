@@ -11,9 +11,9 @@ def main():
     receiver.wait_start_reading()
     window = gbv.StreamWindow(window_name='stream', wrap_object=receiver,
                               drawing_pipeline=gbv.DrawRects(REMOTE_THRESHOLD, (0, 255, 0),
-                                                               contours_process=gbv.FilterContours(100),
-                                                               # circle_process=gbv.sort_circles + gbv.filter_inner_circles,
-                                                               thickness=5))
+                                                             contours_process=gbv.FilterContours(100),
+                                                             # circle_process=gbv.sort_circles + gbv.filter_inner_circles,
+                                                             thickness=5))
     window.show_async()
     threshold = gbv.StreamWindow(window_name='threshold', wrap_object=receiver, drawing_pipeline=REMOTE_THRESHOLD)
     threshold.show()
