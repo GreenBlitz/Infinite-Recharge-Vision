@@ -79,7 +79,6 @@ def main():
     if BaseAlgorithm.DEBUG:
         logger.info('running on debug mode, waiting for a stream receiver to connect...')
         logger.info('initialized stream')
-        camera.toggle_stream(True)
 
     camera.set_auto_exposure(False, foreach=True)
     # camera.rescale(0.5)
