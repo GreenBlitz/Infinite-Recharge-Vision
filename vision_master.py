@@ -65,7 +65,8 @@ def main():
         logger.info("initialized streamer")
         while True:
             _ok, _frame = cam.read()
-            streamer.send_frame(_frame)
+            if _ok:
+                streamer.send_frame(_frame)
 
     Thread(target=__stream_thread).start()
 
