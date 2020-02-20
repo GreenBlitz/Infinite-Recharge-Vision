@@ -63,6 +63,8 @@ def main():
     camera.add_camera(gbv.AsyncUSBCamera(STREAM_CAMERA_PORT, data=stream_data))
     camera.add_camera(gbv.USBCamera(HEX_CAMERA_PORT, data=hex_data))
 
+    camera.select_camera(0)
+
     def __stream_thread():
         cam: gbv.AsyncCamera = camera[STREAM_CAMERA_INDEX]
         cam.wait_start_reading()
