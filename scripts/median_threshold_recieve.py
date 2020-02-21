@@ -5,7 +5,7 @@ import gbvision as gbv
 
 from constants import TCP_STREAM_IP, TCP_STREAM_PORT
 
-stdv = np.array([5, 20, 20])
+stdv = np.array([20, 80, 80])
 
 
 def main():
