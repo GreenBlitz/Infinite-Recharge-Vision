@@ -1,7 +1,7 @@
 import gbvision as gbv
 from gbrpi.electronics.led_ring import LedRing
 
-from constants import OUTER_PORT, OUTER_PORT_THRESHOLD, CONTOUR_MIN_AREA, LOW_EXPOSURE
+from constants import OUTER_PORT, OUTER_PORT_THRESHOLD, CONTOUR_MIN_AREA, LOW_EXPOSURE, HEX_CAMERA_INDEX
 from .base_algorithm import BaseAlgorithm
 
 
@@ -27,7 +27,8 @@ class FindHexagon(BaseAlgorithm):
         self.logger.debug(loc)
         return loc
 
-    def reset(self, camera: gbv.Camera, led_ring: LedRing):
+    def reset(self, camera: gbv.CameraList, led_ring: LedRing):
+        camera.select_camera(HEX_CAMERA_INDEX)
         camera.set_auto_exposure(False)
         camera.set_exposure(LOW_EXPOSURE)
         led_ring.on()

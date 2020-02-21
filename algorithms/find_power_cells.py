@@ -3,7 +3,7 @@ import numpy as np
 
 from gbrpi.electronics.led_ring import LedRing
 
-from constants import HIGH_EXPOSURE
+from constants import HIGH_EXPOSURE, RADIUS_SCALAR, STREAM_CAMERA_INDEX
 from constants.continuity import CONTOUR_MIN_AREA, SHAPE_LIFESPAN
 from constants.game_objects import POWER_CELL
 from constants.thresholds import POWER_CELL_THRESHOLD
@@ -17,12 +17,13 @@ class FindPowerCells(BaseAlgorithm):
         BaseAlgorithm.__init__(self, output_key, success_key, conn, log_algorithm_incomplete)
 
         self.finder = gbv.CircleFinder(game_object=POWER_CELL, threshold_func=POWER_CELL_THRESHOLD,
-                                       contour_min_area=CONTOUR_MIN_AREA)
+                                       contour_min_area=CONTOUR_MIN_AREA, area_scalar=RADIUS_SCALAR)
         self.shaper = self.finder.find_shapes
 
         self.continues = gbv.ContinuesShapeWrapper(finding_pipeline=self.shaper, frame=None, shapes=[],
-                                                   shape_type='CIRCLE', shape_lifespan=SHAPE_LIFESPAN, track_new=True,
-                                                   tracker_type='MEDIANFLOW')
+                                                   shape_type=gbv.ContinuesShapeWrapper.SHAPE_TYPE_CIRCLE,
+                                                   shape_lifespan=SHAPE_LIFESPAN, track_new=True,
+                                                   tracker_type=gbv.Tracker.TRACKER_TYPE_EMPTY)
         self.found_cell = False
         self.closest_id = None
 
@@ -36,11 +37,6 @@ class FindPowerCells(BaseAlgorithm):
         loc = self.finder.locations_from_shapes(shapes=[power_cells[self.closest_id]], camera=camera)[0]
         self.logger.debug(loc)
         return loc
-
-    def reset(self, camera: gbv.Camera, led_ring: LedRing):
-        camera.set_auto_exposure(False)
-        camera.set_exposure(HIGH_EXPOSURE)
-        led_ring.off()
 
     def __get_optimal(self, shapes, camera):
         closest_id = None
@@ -58,3 +54,9 @@ class FindPowerCells(BaseAlgorithm):
                 current_cost = tmp_cost
 
         return closest_id
+
+    def reset(self, camera: gbv.CameraList, led_ring: LedRing):
+        camera.select_camera(STREAM_CAMERA_INDEX)
+        camera.set_auto_exposure(False)
+        camera.set_exposure(HIGH_EXPOSURE)
+        led_ring.off()

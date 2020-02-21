@@ -1,9 +1,15 @@
+from threading import Thread
+
 import gbvision as gbv
 import gbrpi
 
-from algorithms import BaseAlgorithm
-from constants import CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, PITCH_ANGLE, YAW_ANGLE, ROLL_ANGLE, X_OFFSET, \
-    Y_OFFSET, Z_OFFSET
+from algorithms import BaseAlgorithm, find_hexagon, find_feeding, find_power_cells
+from constants import HEX_CAMERA_PORT, STREAM_CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, STREAM_PITCH_ANGLE, \
+    STREAM_YAW_ANGLE, \
+    STREAM_ROLL_ANGLE, STREAM_X_OFFSET, \
+    STREAM_Y_OFFSET, STREAM_Z_OFFSET, HEX_PITCH_ANGLE, HEX_YAW_ANGLE, \
+    HEX_ROLL_ANGLE, HEX_X_OFFSET, \
+    HEX_Y_OFFSET, HEX_Z_OFFSET, STREAM_CAMERA_INDEX, STREAM_USE_GRAYSCALE, STREAM_MAX_BITRATE, STREAM_FX, STREAM_FY
 from constants import TABLE_IP, TABLE_NAME, OUTPUT_KEY, SUCCESS_KEY
 from tools.system import is_on_rpi
 from utils.gblogger import GBLogger
@@ -23,6 +29,7 @@ class __EmptyLedRing:
 
 
 LedRing = gbrpi.LedRing if is_on_rpi() else __EmptyLedRing
+camera = gbv.CameraList([])
 
 
 def main():
@@ -31,20 +38,39 @@ def main():
     conn = gbrpi.TableConn(ip=TABLE_IP, table_name=TABLE_NAME)
     led_ring = LedRing(LED_RING_PORT)
     logger.info('initialized conn')
-    data = gbv.LIFECAM_3000.rotate_pitch(PITCH_ANGLE). \
-        rotate_yaw(YAW_ANGLE). \
-        rotate_roll(ROLL_ANGLE). \
-        move_x(X_OFFSET). \
-        move_y(Y_OFFSET). \
-        move_z(Z_OFFSET)
-    if BaseAlgorithm.DEBUG:
-        logger.info('running on debug mode, waiting for a stream receiver to connect...')
-        camera = gbv.USBStreamCamera(gbv.TCPStreamBroadcaster(TCP_STREAM_PORT), CAMERA_PORT, data=data)
-        logger.info('initialized stream')
-        camera.toggle_stream(True)
-    else:
-        camera = gbv.USBCamera(CAMERA_PORT, data=data)
-    camera.set_auto_exposure(False)
+    hex_data = gbv.LIFECAM_3000.rotate_pitch(HEX_PITCH_ANGLE). \
+        rotate_yaw(HEX_YAW_ANGLE). \
+        rotate_roll(HEX_ROLL_ANGLE). \
+        move_x(HEX_X_OFFSET). \
+        move_y(HEX_Y_OFFSET). \
+        move_z(HEX_Z_OFFSET)
+
+    stream_data = gbv.LIFECAM_3000.rotate_pitch(STREAM_PITCH_ANGLE). \
+        rotate_yaw(STREAM_YAW_ANGLE). \
+        rotate_roll(STREAM_ROLL_ANGLE). \
+        move_x(STREAM_X_OFFSET). \
+        move_y(STREAM_Y_OFFSET). \
+        move_z(STREAM_Z_OFFSET)
+
+    camera.add_camera(gbv.AsyncUSBCamera(STREAM_CAMERA_PORT, data=stream_data))
+    camera.add_camera(gbv.USBCamera(HEX_CAMERA_PORT, data=hex_data))
+
+    camera.select_camera(0)
+
+    def __stream_thread():
+        cam: gbv.AsyncCamera = camera[STREAM_CAMERA_INDEX]
+        cam.wait_start_reading()
+        streamer = gbv.TCPStreamBroadcaster(TCP_STREAM_PORT, use_grayscale=STREAM_USE_GRAYSCALE,
+                                            max_bitrate=STREAM_MAX_BITRATE, fx=STREAM_FX, fy=STREAM_FY)
+        logger.info("initialized streamer")
+        while True:
+            _ok, _frame = cam.read()
+            if _ok:
+                streamer.send_frame(_frame)
+
+    Thread(target=__stream_thread).start()
+
+    camera.set_auto_exposure(False, foreach=True)
     # camera.rescale(0.5)
     logger.info('initialized camera')
 
@@ -58,16 +84,20 @@ def main():
     logger.info('starting...')
 
     while True:
-        ok, frame = camera.read()
         algo_type = conn.get('algorithm')
         if algo_type is not None:
             if algo_type not in possible_algos:
                 logger.warning(f'Unknown algorithm type: {algo_type}')
+                continue
+            algo = possible_algos[algo_type]
             if algo_type != current_algo:
                 logger.debug(f'switched to algorithm: {algo_type}')
-                possible_algos[algo_type].reset(camera, led_ring)
-            algo = possible_algos[algo_type]
-            algo(frame, camera)
+                algo.reset(camera, led_ring)
+            ok, frame = camera.read()
+            if ok:
+                algo(frame, camera)
+            else:
+                logger.warning(f'frame not read from camera during algorithm: {algo_type}')
         current_algo = algo_type
 
 

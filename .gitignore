@@ -14,5 +14,7 @@ venv/
 
 # test videos
 *.avi
+*.mp4
 
 logs/
+
