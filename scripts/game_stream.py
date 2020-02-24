@@ -42,7 +42,7 @@ def draw(frame: gbv.Frame):
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=time_left, coords=timer_coord, font_scale=2, thickness=5)
     frame = gbv.draw_text(frame, color=(255, 255, 255), text=time_left, coords=timer_coord, font_scale=2, thickness=1)
 
-    gear = conn.get('shifter_state', 'power').upper()
+    gear = conn.get('shifter_state', 'speed').upper()
     gear_coord = 400, 9 * frame.shape[0] // 10
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=gear, coords=gear_coord, font_scale=2, thickness=5)
     frame = gbv.draw_text(frame, color=(255, 255, 255), text=gear, coords=gear_coord, font_scale=2, thickness=1)
@@ -55,14 +55,14 @@ def draw(frame: gbv.Frame):
                              color=color,
                              thickness=3)
 
-    shooter_speed = str(int(shooter_conn.get('Velocity')))
+    shooter_speed = str(int(shooter_conn.get('Velocity', 0)))
     shooter_coord = 450, 50
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=shooter_speed, coords=shooter_coord, font_scale=2, thickness=5)
     frame = gbv.draw_text(frame, color=(255, 255, 255), text=shooter_speed, coords=shooter_coord, font_scale=2,
                           thickness=1)
 
-    dome_angle = str((dome_conn.get('Potentiometer')))[:6]
-    dome_coords = 20, 20
+    dome_angle = str((dome_conn.get('Potentiometer', 0)))[:6]
+    dome_coords = 20, 50
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=dome_angle, coords=dome_coords, font_scale=2, thickness=5)
     frame = gbv.draw_text(frame, color=(255, 255, 255), text=dome_angle, coords=dome_coords, font_scale=2,
                           thickness=1)
