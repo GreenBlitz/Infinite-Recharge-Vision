@@ -85,8 +85,8 @@ def on_game_state_change(new_state: str):
 
 
 def main():
-    stream = gbv.AsyncTCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)
-    stream.wait_start_reading()
+    stream = gbv.TCPStreamReceiver('127.0.0.1', TCP_STREAM_PORT)
+    # stream.wait_start_reading()
     # stream = gbv.USBCamera(0)
     conn.add_entry_change_listener(on_game_state_change, 'game_state')
     if not os.path.exists('records/'):
@@ -98,10 +98,7 @@ def main():
         last_index = max(map(lambda x: x[6:-4], files))
     window = gbv.RecordingCameraWindow('stream', stream, f'records/stream{last_index}.mp4',
                                        drawing_pipeline=draw, recording_pipeline=draw)
-
     window.show()
-
-    exit(0)
 
 
 if __name__ == '__main__':
