@@ -2,6 +2,7 @@ from threading import Thread
 
 import gbvision as gbv
 import gbrpi
+import gbrpi.net.rs232_connection as rs232
 
 from algorithms import BaseAlgorithm, find_hexagon, find_feeding, find_power_cells
 from constants import HEX_CAMERA_PORT, STREAM_CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, STREAM_PITCH_ANGLE, \
@@ -36,6 +37,7 @@ def main():
     logger = GBLogger(LOGGER_NAME, use_file=True)
     logger.allow_debug = BaseAlgorithm.DEBUG
     conn = gbrpi.TableConn(ip=TABLE_IP, table_name=TABLE_NAME)
+    rs_conn = rs232.RS232("/dev/ttyS0", ["power_cells", "hexagon", "feeding_station"])
     led_ring = LedRing(LED_RING_PORT)
     logger.info('initialized conn')
     hex_data = gbv.LIFECAM_3000.rotate_pitch(HEX_PITCH_ANGLE). \
@@ -65,30 +67,39 @@ def main():
 
     logger.debug(f'Algorithms: {", ".join(all_algos)}')
 
-    possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, conn) for key in all_algos}
+    possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, rs_conn, conn) for key in all_algos}
     current_algo = None
 
     logger.info('starting...')
 
     conn.set(ALGORITHM_KEY, 'hexagon')
+    rs_conn.algo = "hexagon"
+
+    rs_conn.start_handler_thread()
 
     while True:
         conn.set(HANDSHAKE_KEY, True)
-        algo_type = conn.get(ALGORITHM_KEY)
+        algo_type = rs_conn.algo  # conn.get(ALGORITHM_KEY)
+
         if algo_type is not None:
+
             if algo_type not in possible_algos:
                 logger.warning(f'Unknown algorithm type: {algo_type}')
                 continue
+
             algo = possible_algos[algo_type]
             if algo_type != current_algo:
                 logger.debug(f'switched to algorithm: {algo_type}')
                 algo.reset(camera, led_ring)
+
             ok, frame = camera.read()
             if ok:
                 algo(frame, camera)
             else:
+                rs_conn.latest_data = None
                 conn.set(SUCCESS_KEY, False)
                 logger.warning(f'frame not read from camera during algorithm: {algo_type}')
+
         current_algo = algo_type
 
 
