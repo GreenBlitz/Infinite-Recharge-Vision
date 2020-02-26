@@ -52,7 +52,7 @@ def main():
         move_y(STREAM_Y_OFFSET). \
         move_z(STREAM_Z_OFFSET)
 
-    camera.add_camera(gbv.USBCamera(HEX_CAMERA_PORT, data=hex_data))
+    camera.add_camera(gbv.USBCamera('scripts/record2.avi', data=hex_data))
     camera.add_camera(gbv.USBCamera(STREAM_CAMERA_PORT, data=stream_data))
 
     camera.select_camera(0)
@@ -69,6 +69,8 @@ def main():
     current_algo = None
 
     logger.info('starting...')
+
+    conn.set(ALGORITHM_KEY, 'hexagon')
 
     while True:
         conn.set(HANDSHAKE_KEY, True)

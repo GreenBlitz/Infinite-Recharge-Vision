@@ -37,6 +37,8 @@ def update_time():
 def draw(frame: gbv.Frame):
     global seconds_left, minutes_left, start_time, conn
     update_time()
+    if frame is None:
+        return frame
     timer_coord = 10, 9 * frame.shape[0] // 10
     time_left = f"0{max(0, minutes_left)}:{max(0, seconds_left) if seconds_left > 9 else f'0{max(0, seconds_left)}'}"
     frame = gbv.draw_text(frame, color=(0, 0, 0), text=time_left, coords=timer_coord, font_scale=2, thickness=5)
@@ -85,7 +87,7 @@ def on_game_state_change(new_state: str):
 
 
 def main():
-    stream = gbv.TCPStreamReceiver('127.0.0.1', TCP_STREAM_PORT)
+    stream = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT, fx=4, fy=4)
     # stream.wait_start_reading()
     # stream = gbv.USBCamera(0)
     conn.add_entry_change_listener(on_game_state_change, 'game_state')
