@@ -3,12 +3,12 @@ import cv2
 
 from constants import TCP_STREAM_IP, TCP_STREAM_PORT
 
-REMOTE_THRESHOLD = gbv.ColorThreshold([[69, 79], [101, 141], [233, 255]], 'HLS') + gbv.Dilate(3) + gbv.Erode(3)
+REMOTE_THRESHOLD = gbv.ColorThreshold([[0, 255], [100, 255], [0, 150]], 'BGR') + gbv.Dilate(4)
 
 
 def main():
-    receiver = gbv.AsyncTCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)
-    receiver.wait_start_reading()
+    receiver = gbv.USBCamera("record.avi") #gbv.AsyncTCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT)
+    # receiver.wait_start_reading()
     window = gbv.StreamWindow(window_name='stream', wrap_object=receiver,
                               drawing_pipeline=gbv.DrawRects(REMOTE_THRESHOLD, (0, 255, 0),
                                                              contours_process=gbv.FilterContours(100),
