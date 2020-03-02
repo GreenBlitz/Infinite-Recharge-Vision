@@ -58,7 +58,7 @@ class BaseAlgorithm(abc.ABC):
                 for i, value in enumerate(values):
                     # No support for this in RS232 :(
                     self.conn.set(self.output_key[i], value)
-                self.conn.set(self.success_key, True)
+            self.conn.set(self.success_key, True)
         except self.AlgorithmIncomplete as e:
             self.rs_conn.latest_data = None
             self.conn.set(self.success_key, False)
