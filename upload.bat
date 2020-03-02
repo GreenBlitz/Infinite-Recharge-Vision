@@ -1,1 +1,1 @@
-scp -r %cd% pi@frcvision.local:~/vision
+scp -r %cd% pi@10.45.90.8:~/vision
