@@ -5,6 +5,10 @@ from constants import OUTER_PORT, OUTER_PORT_THRESHOLD, CONTOUR_MIN_AREA, LOW_EX
 from constants.game_objects import OUTER_PORT
 from constants.continuity import CONTOUR_MIN_AREA
 
+ERODE = 11
+DILATE_I = 5
+DILATE_F = 1
+
 
 def _process(frame: gbv.Frame, camera: gbv.Camera):
     """
@@ -17,7 +21,7 @@ def _process(frame: gbv.Frame, camera: gbv.Camera):
     shapes = finder.find_shapes(frame)
     if len(shapes) == 0:
         return (-1, -1, -1)
-    hexagon = shapes[0]
+    hexagon = shapes[-1]
 
     loc = finder.locations_from_shapes([hexagon], camera)[0]
     return loc
@@ -32,15 +36,20 @@ def main():
     threshold = gbv.ColorThreshold([[30, 110], [215, 255], [70, 150]], 'HSV')
     camera = gbv.USBCamera(1, LIFECAM_3000)
     reset(camera)
-    window = gbv.FeedWindow('Feed',
-                            drawing_pipeline=gbv.DrawCircles(threshold + gbv.Dilate(3) + gbv.ErodeAndDilate((8, 5)),
-                                                             (0, 0, 255)))
 
+    org = gbv.FeedWindow('Org', drawing_pipeline=threshold)
+    window = gbv.FeedWindow('Feed',
+                            drawing_pipeline=gbv.DrawCircles(threshold + gbv.Dilate(DILATE_I) + gbv.ErodeAndDilate((ERODE, DILATE_F)),
+                                                             (0, 0, 255)))
+    thresholdwindow = gbv.FeedWindow('feedthresh',
+                                     drawing_pipeline=threshold + gbv.Dilate(DILATE_I) + gbv.ErodeAndDilate((ERODE, DILATE_F)))
     while True:
         ok, frame = camera.read()
         window.show_frame(frame)
+        org.show_frame(frame)
+        thresholdwindow.show_frame(frame)
 
-        if window.last_key_pressed == 'q':
+        if 'q' == window.last_key_pressed or 'q' == org.last_key_pressed or 'q' == thresholdwindow.last_key_pressed:
             break
 
         result = _process(frame, camera)
