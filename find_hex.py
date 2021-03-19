@@ -32,7 +32,9 @@ def main():
     threshold = gbv.ColorThreshold([[30, 110], [215, 255], [70, 150]], 'HSV')
     camera = gbv.USBCamera(1, LIFECAM_3000)
     reset(camera)
-    window = gbv.FeedWindow('Feed', drawing_pipeline=threshold + gbv.ErodeAndDilate(5))#gbv.DrawCircles(threshold, (0, 0, 255)))
+    window = gbv.FeedWindow('Feed',
+                            drawing_pipeline=gbv.DrawCircles(threshold + gbv.Dilate(3) + gbv.ErodeAndDilate((8, 5)),
+                                                             (0, 0, 255)))
 
     while True:
         ok, frame = camera.read()
