@@ -3,14 +3,15 @@ import numpy as np
 
 import gbvision as gbv
 
-from constants import TCP_STREAM_IP, TCP_STREAM_PORT
+#from constants import TCP_STREAM_IP, TCP_STREAM_PORT
 
 stdv = np.array([20, 80, 80])
 
 
-def main():
-    receive = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT, fx=1.5, fy=1.5)
-    window = gbv.StreamWindow('feed', receive)
+def main(file):
+#    receive = gbv.TCPStreamReceiver(TCP_STREAM_IP, TCP_STREAM_PORT, fx=1.5, fy=1.5)
+    receive = gbv.USBCamera(f'{file}')
+    window = gbv.CameraWindow('feed', receive)
     while True:
         frame = window.show_and_get_frame()
         k = window.last_key_pressed
@@ -37,4 +38,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main('record.avi')
