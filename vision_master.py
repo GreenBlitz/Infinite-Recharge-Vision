@@ -1,13 +1,10 @@
-from threading import Thread
-
 import gbvision as gbv
 import gbrpi
+import gbrpi.net.rs232_connection as rs232
 
-from algorithms import BaseAlgorithm, find_hexagon, find_feeding, find_power_cells
-from constants import HEX_CAMERA_PORT, STREAM_CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, STREAM_PITCH_ANGLE, \
-    STREAM_YAW_ANGLE, \
-    STREAM_ROLL_ANGLE, STREAM_X_OFFSET, \
-    STREAM_Y_OFFSET, STREAM_Z_OFFSET, HEX_PITCH_ANGLE, HEX_YAW_ANGLE, \
+from algorithms import BaseAlgorithm
+from constants import HEX_CAMERA_PORT, STREAM_CAMERA_PORT, TCP_STREAM_PORT, LED_RING_PORT, HEX_PITCH_ANGLE, \
+    HEX_YAW_ANGLE, \
     HEX_ROLL_ANGLE, HEX_X_OFFSET, \
     HEX_Y_OFFSET, HEX_Z_OFFSET, STREAM_CAMERA_INDEX, STREAM_USE_GRAYSCALE, STREAM_MAX_BITRATE, STREAM_FX, STREAM_FY
 from constants import TABLE_IP, TABLE_NAME, OUTPUT_KEY, SUCCESS_KEY, HANDSHAKE_KEY, ALGORITHM_KEY
@@ -45,15 +42,7 @@ def main():
         move_y(HEX_Y_OFFSET). \
         move_z(HEX_Z_OFFSET)
 
-    stream_data = gbv.LIFECAM_3000.rotate_pitch(STREAM_PITCH_ANGLE). \
-        rotate_yaw(STREAM_YAW_ANGLE). \
-        rotate_roll(STREAM_ROLL_ANGLE). \
-        move_x(STREAM_X_OFFSET). \
-        move_y(STREAM_Y_OFFSET). \
-        move_z(STREAM_Z_OFFSET)
-
     camera.add_camera(gbv.USBCamera(HEX_CAMERA_PORT, data=hex_data))
-    camera.add_camera(gbv.USBCamera(STREAM_CAMERA_PORT, data=stream_data))
 
     camera.select_camera(0)
 
@@ -64,29 +53,41 @@ def main():
     all_algos = BaseAlgorithm.get_algorithms()
 
     logger.debug(f'Algorithms: {", ".join(all_algos)}')
+    rs_conn = rs232.RS232("/dev/ttyS0", list(all_algos))
+    possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, rs_conn, conn) for key in all_algos}
 
-    possible_algos = {key: all_algos[key](OUTPUT_KEY, SUCCESS_KEY, conn) for key in all_algos}
     current_algo = None
 
     logger.info('starting...')
 
+    conn.set(ALGORITHM_KEY, 'hexagon')
+    rs_conn.algo = "hexagon"
+
+    rs_conn.start_handler_thread()
+
     while True:
         conn.set(HANDSHAKE_KEY, True)
-        algo_type = conn.get(ALGORITHM_KEY)
+        algo_type = rs_conn.algo  # conn.get(ALGORITHM_KEY)
+
         if algo_type is not None:
+
             if algo_type not in possible_algos:
                 logger.warning(f'Unknown algorithm type: {algo_type}')
                 continue
+
             algo = possible_algos[algo_type]
             if algo_type != current_algo:
                 logger.debug(f'switched to algorithm: {algo_type}')
                 algo.reset(camera, led_ring)
+
             ok, frame = camera.read()
             if ok:
                 algo(frame, camera)
             else:
+                rs_conn.latest_data = None
                 conn.set(SUCCESS_KEY, False)
                 logger.warning(f'frame not read from camera during algorithm: {algo_type}')
+
         current_algo = algo_type
 
 

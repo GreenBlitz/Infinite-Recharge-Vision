@@ -3,6 +3,7 @@ from typing import Union, List, Iterable, Dict, Type
 
 import gbvision as gbv
 import gbrpi
+from gbrpi.net.rs232_connection import RS232
 
 from utils.gblogger import GBLogger
 
@@ -37,10 +38,11 @@ class BaseAlgorithm(abc.ABC):
                 f'duplicated entry for algorithm_name {cls.algorithm_name}: {other_cls.__name__} and {cls.__name__}')
         BaseAlgorithm.__registered[cls.algorithm_name] = cls
 
-    def __init__(self, output_key: Union[str, List[str]], success_key: str, conn: gbrpi.TableConn,
+    def __init__(self, output_key: Union[str, List[str]], success_key: str, rs_conn: RS232, conn: gbrpi.TableConn,
                  log_algorithm_incomplete=False):
         self.output_key = output_key
         self.success_key = success_key
+        self.rs_conn = rs_conn
         self.conn = conn
         self.log_algorithm_incomplete = log_algorithm_incomplete
         self.logger = GBLogger(self.algorithm_name, use_file=self.USE_FILE)
@@ -50,12 +52,15 @@ class BaseAlgorithm(abc.ABC):
         try:
             values = self._process(frame, camera)
             if type(self.output_key) is str:
+                self.rs_conn.latest_data = [i.item() for i in values]
                 self.conn.set(self.output_key, values)
             else:
                 for i, value in enumerate(values):
+                    # No support for this in RS232 :(
                     self.conn.set(self.output_key[i], value)
             self.conn.set(self.success_key, True)
         except self.AlgorithmIncomplete as e:
+            self.rs_conn.latest_data = None
             self.conn.set(self.success_key, False)
             if self.log_algorithm_incomplete:
                 self.logger.warning(repr(e))
